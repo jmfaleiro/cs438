@@ -26,7 +26,6 @@ thread_launcher::thread_launcher(int max_outstanding)
 
 void thread_launcher::execute_request(request *req)
 {
-        pthread_attr_t attr;
         pthread_t *thread;
         thread_arg *arg, *temp;
         int err;
@@ -42,25 +41,12 @@ void thread_launcher::execute_request(request *req)
          */
         thread = (pthread_t*)malloc(sizeof(pthread_t));
         
-        /* 
-         * pthread_attr_init initializes the "attr" argument supplied to 
-         * pthread_create. We want to create a "detached" thread, 
-         * which basically means that the operating system immediately frees any
-         * resources associated with the thread as soon as it finishes 
-         * executing. If we didn't set this flag, then the launching thread 
-         * would have to explicitly wait on spawned threads in order to allow 
-         * the operating system to free their resources.
-         */
-        pthread_attr_init(&attr);
-        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-        
         /* Setup the thread's thread_arg struct. */
         arg = gen_thread_arg(req, thread, &_done_sem, &_targ_list_sem, 
                              &_targ_list, _txns_executed);
         
         /* Create a thread to execute the request */
-        err = pthread_create(thread, &attr, thread_launcher::executor_fn, arg);
-        pthread_attr_destroy(&attr);
+        err = pthread_create(thread, NULL, thread_launcher::executor_fn, arg);
         assert(err == 0);
 
         /* 
@@ -87,6 +73,7 @@ void thread_launcher::execute_request(request *req)
         while (arg != NULL) {
                 temp = arg;
                 arg = arg->_link;
+                pthread_join(*temp->_thread_id, NULL);
                 free(temp->_thread_id);
                 free(temp);
         }
