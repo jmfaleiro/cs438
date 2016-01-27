@@ -1,7 +1,6 @@
-In this assigment, you will implement four different process models
+In this assigment, you will implement two different process models
 from chapter two of the "Architecture of a Database System" reference;
-the process-per-request, thread-per-request, process-pool, and
-thread-pool models. 
+the process-pool, and thread-pool models. 
 
 Execution models --
 The assignment uses linux's pthreads to implement the
