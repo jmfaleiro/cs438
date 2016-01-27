@@ -89,6 +89,13 @@ pthread_t* run_experiment(perf_monitor *monitor, launcher *lnchr,
         lnchr->wait_outstanding();
         std::cerr << "Done dry run\n";
 
+        /* 
+         * Run the "real" experiment. We create a new thread to monitor the 
+         * progress of requests. See include/perf_monitor.h and 
+         * src/perf_monitor.cc. The perf_monitor thread samples the number of 
+         * _txns_executed counter in the launcher class in one second 
+         * intervals, and sets the done_flag below after 60 seconds. 
+         */
         err = pthread_create(ret, NULL, perf_monitor::execute_thread, monitor);
         assert(err == 0);
         barrier();

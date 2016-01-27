@@ -132,7 +132,7 @@ void process_pool_launcher::execute_request(request *req)
          * Find an idle process from _free_list, copy the request into the 
          * process' request buffer, and execute the request on the idle process.
          * 
-         * Hint: Use the process' _proc_sem, and the launcher's _pool_sem to 
+         * Hint: Use the process' _proc_sem, and the launcher's _done_sem to 
          * initiate a new request on the idle process, and ensure that there 
          * exist idle processes.
          */
