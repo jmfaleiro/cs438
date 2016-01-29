@@ -1,10 +1,15 @@
-In this assigment, you will implement two different process models
-from chapter two of the "Architecture of a Database System" reference;
-the process-pool, and thread-pool models. 
+CPSC 438: Assignment 1
+Lead TF: Jose Faleiro (Questions or clarification requests should be emailed to jose.faleiro@yale.edu and cc kun.ren@yale.edu)
+
+In this assignment, you will get some hands-on experience exploring the performance and architectural differences between database system process models. The main challenge of this assignment will be to understand existing code that we are providing you. By reading though this code, we hope you will get a sense of some of the basic implementation differences between thread-based and process-based process models. The amount of code you have to write for this assignment is quite small. In short, we are providing implementations of thread-per worker and process-per-worker process models (see chapter two of the "Architecture of a Database System" paper that we read last week) over a simple database stored as an array in main memory. Your goal in this assignment is to implement the process-pool and thread-pool variants of these process models. Even for these variants, we have written most of the code for you --- we have just left the most interesting parts of the code left for you to implement. However, if you do not understand the thread-per worker and process-per-worker code that we have provided you, you will likely be unable to add the missing code (even though it is small) for the thread-pool and process-pool variants. Students are encouraged to take advantage of teaching fellow office hours (which will be announced via an email) if they have trouble understanding the code that we are providing you. We expect different students will have different prior experiences with writing multi-threaded or multi-process programs. 
+
+Aside from writing code, this assignment involves running some performance experiments, and answering some questions we ask below.
+
+This assignment --- especially the performance experiments --- should be performed on machines in the Zoo. If you do not alraedy have a Zoo account, please see a TF. 
 
 Execution models --
 The assignment uses linux's pthreads to implement the
-thread-per-request and thread-pool models. [2] provides a good
+thread-per-request and thread-pool models. http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html provides a good
 reference for programming with pthreads on linux. 
 The assignment codebase only uses pthreads for managing threads' lifecycles
 (thread creation and deletion). Inter-thread synchronization is
@@ -18,11 +23,12 @@ below).
 
 Synchronization -- 
 This assignment uses semaphores to mediate inter-thread and
-inter-process communication. We recommend you read through 
-[1] for some background on semaphores.
+inter-process communication. Semaphores are covered (at least theoretically) in the prerequisites to CPSC 438. We recommend you read through 
+http://pages.cs.wisc.edu/~remzi/Classes/537/Fall2008/Notes/threads-semaphores.txt for some background on semaphores if you have not seen them in the past.
+
 WARNING: Semaphores are a critical part of this assignment. You will
 struggle without a basing understanding of the concepts outlined in
-[1]. 
+http://pages.cs.wisc.edu/~remzi/Classes/537/Fall2008/Notes/threads-semaphores.txt. 
 
 Codebase --
 The include/utils.h file contains several flags you may find useful
@@ -32,14 +38,14 @@ The assignment models a database processing requests that manipulate
 several records.
 
 The database consists of an array of 1000-byte-sized records. The
-database exports three functions relevant to your code; get_record,
+database exports three important functions: get_record,
 lock_record, and unlock_record. get_record returns a reference to a
 record. lock_record and unlock_record serve as mutex-locks, giving the
 calling process or thread exclusive access to a particular record. 
 
 Each request updates several records in the database. In order to run
 a request, a process or thread calls a request's execute function in
-order to process the request. 
+order to process it. 
 
 Launcher is the base class from which each execution
 model will derive (process_pool_launcher, process_launcher,
@@ -49,10 +55,10 @@ override launcher's execute_request function.
 Your task is to complete the implementations of the
 process_pool_launcher, and thread_pool_launcher classes. Look for
 "YOUR CODE HERE" annotations in the comments in
-src/process_pool_launcher.cc and src/thread_pool_launcher.cc. We have
+src/process_pool_launcher.cc and src/thread_pool_launcher.cc. As mentioned above, we have
 provided implementations of the process-per-request, and
-thread-per-request execution models in process_launcher, and
-thread_launcher, respectively. You should use these implementations as
+thread-per-request execution models in process_launcher.cc, and
+thread_launcher.cc, respectively. You should use these implementations as
 references while building your thread-pool, and process-pool 
 implementations. 
 
@@ -101,7 +107,7 @@ executable will check for correctness using a serial execution model.
 Running your code with the --test option will not measure throughput. 
 
 Finally, you will need to report measurements for running requests
-under varying levels of conflicts between requests. We have provided a
+under varying levels of conflicts between requests. Two requests conflict if they they try to access the same record in the database. We have provided a
 --contention option to induce conflicts among transactions. To
 run an experiment under high contention (lots of conflicts), add the 
 --contention flag as an argument to the executable. Experiments run
@@ -134,7 +140,7 @@ these test cases is the only way to earn credit for your code. We will
 award no points for code that does not pass _all_ test cases.
 
 ================================================================================
-25 points for each execution model. Total 50 points.
+20 points for each execution model. Total 40 points.
 ================================================================================
 
 - For each execution model, report throughput while varying the pool
@@ -156,29 +162,27 @@ process_pool 2000 3000 4000 5000 6000 7000 ...
 - Provide a brief explanation (between three to four paragraphs) for
 the throughput trends you observe in a separate file,
 "responses.txt". In particular, explain the differences between each
-execution model under each level of contention. In addition, explain
-the differences between high-contention and low-contention
-experiments. Finally, answer each of the following questions briefly
+process model --- why do some models get higher throughput than other models? Which process model is the fastest and why is it the fastest? Which one is slowest and why is it slowest? Why are the ones in the middle slower/faster than the two at the extremes? How and why does throughout change as the maximum number of outstanding requests or pool size change? In addition, explain the differences between high-contention and low-contention experiments. 
+
+================================================================================
+44 points for performance results / analysis
+================================================================================
+
+Finally, answer each of the following questions briefly
 (at most two paragraphs per question) in "responses.txt". 
 
 Questions --
-1) Why does the process-per-request implementation not require an
-argument to be passed to the child process responsible for a request? 
-
-2) The process-pool implementation must copy a request into a process'
+1) The process-pool implementation must copy a request into a process'
 request buffer. The process-per-request implementation, however, does
 not need to copy or pass requests between processes. Why?
 
-3) The process-pool implementation requires a request to be copied
+2) The process-pool implementation requires a request to be copied
 into a process-local buffer before the request can be executed. On the
 other hand, the thread-pool implementation can simply use a pointer to
 the appropriate request. Why?
 
 ================================================================================
-12.5 points for each response. Total 50 points.
+8 points for each response. Total 16 points.
 ================================================================================
 
-References --
-[1] http://pages.cs.wisc.edu/~remzi/Classes/537/Fall2008/Notes/threads-semaphores.txt
-
-[2] http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html
+Please submit the assignment via the assignments link on classes v2 according to the instructions there.
