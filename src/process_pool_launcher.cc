@@ -69,7 +69,7 @@ process_pool_launcher::process_pool_launcher(uint32_t nprocs)
          * is used to signal the process to begin executing a new request. 
          * We initialize the value of this semaphore to 0.
          */
-        proc_sems = (sem_t*)mmap(NULL, sizeof(sem_t), PROT_FLAGS, MAP_FLAGS, 0, 0);
+        proc_sems = (sem_t*)mmap(NULL, nprocs*sizeof(sem_t), PROT_FLAGS, MAP_FLAGS, 0, 0);
         for (i = 0; i < nprocs; ++i) 
                 sem_init(&proc_sems[i], INTER_PROC_SEM, 0);
 
