@@ -27,7 +27,8 @@ thread_pool_launcher::thread_pool_launcher(int pool_sz)
          * _done_sem is used to track the number of idle/busy processes.
          * 
          * Hint: Since both _free_list_sem, and _done_sem are shared among 
-         * threads of a single process, set 
+         * threads of a single process, the second argument to sem_init must be 
+         * set appropriately.
          */
 
 
